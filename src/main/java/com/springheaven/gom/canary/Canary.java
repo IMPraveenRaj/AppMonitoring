@@ -22,7 +22,7 @@ public class Canary {
     private StepRepository stepRepository;
 @PostConstruct
     public void init(){
-
+//initialize the configuration  eg> crateate db connection set access certification
     }
 
     /**
@@ -59,5 +59,8 @@ public class Canary {
         results.add((StepResultWrapper) stepRepository.secondStep());
         results.add((StepResultWrapper) stepRepository.thirdStep());
 
+
+
+        return  results;
     }
 }

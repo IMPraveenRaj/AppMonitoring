@@ -1,15 +1,28 @@
 package com.springheaven.gom.canary.service;
 
 import com.springheaven.gom.canary.common.Exception.GomExecutionException;
+import com.springheaven.gom.canary.common.dto.CanaryIdpData;
+import com.springheaven.gom.canary.ida.dto.TokenResponse;
+import com.springheaven.gom.canary.ida.service.IdaTokenService;
+import com.springheaven.gom.canary.idp.config.IdpApiConfig;
+import com.springheaven.gom.canary.idp.service.IpdTokenService;
 import com.springheaven.gom.canary.testrunner.Result;
 import com.springheaven.gom.canary.testrunner.StepResult;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.env.Environment;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -28,7 +41,7 @@ public class StepRepository {
 
     private final Environment env;
 
-    private final IdpTokenService ipdIdpTokenService;
+    private final IpdTokenService ipdIdpTokenService;
 
     private  final CanaryIdpData canaryIdpData;
 
@@ -45,8 +58,8 @@ public class StepRepository {
     private String tokenCheck;
 
 
-    public StepRepository(@Qualifier("idaRestTemplate")RestTemplate restTemplate,IdaTokenService tokenService,final
-                          Environment env,IdptokenService idptokenService,IdpApiConfig apiConfig,ApplicationContext context){
+    public StepRepository(@Qualifier("idaRestTemplate")RestTemplate restTemplate, IdaTokenService tokenService, final
+                          Environment env, IpdTokenService idptokenService, IdpApiConfig apiConfig, ApplicationContext context){
 
         this.restTemplate=restTemplate;
         this.env=env;
@@ -58,7 +71,7 @@ public class StepRepository {
 
 
     public void setParameters(){
-        clEcid='022074473';
+        clEcid="'022074473'";
         accountCaid=env.getProperty("ipd.qs.canary.accountCaid");
     }
 
@@ -131,6 +144,33 @@ public class StepRepository {
                 return StepResult.failed(e.getMessage());
             }
 
+
+    }
+
+    private  Result getHttpResult(final String messageBody){
+
+
+        try(CloseableHttpClient httpClient= context.getBean("idpHttpClient",CloseableHttpClient.class)){
+            HttpPost request=  new HttpPost(restUrl);
+            request.setHeader("Accept", MediaType.APPLICATION_JSON_VALUE);
+            request.setHeader("Content-Type",MediaType.APPLICATION_JSON_VALUE);
+            request.setHeader("Authorization","Bearer "+canaryIdpData.getIdpToken());
+            org.apache.http.HttpEntity entity= new StringEntity(messageBody);
+            request.setEntity(entity);
+            try(CloseableHttpResponse response=httpClient.execute(request)){
+                int statusCode=response.getStatusLine().getStatusCode();
+                message = EntityUtils.toString(response.getEntity());
+                log.info("IDP response :{}",message);
+                if(statusCode==200){
+                    return StepResult.successful(" Dataset"+dataSet+"IDp Processed status code is "+String.valueOf(response.getStatusLine().getStatusCode()));
+                }else {
+                    return  StepResult.failed("status code Received from IDP "+statusCode+"Result"+message);
+                }
+            }
+        }catch (IOException e){
+            log.error(ExceptionUtils.getStackTrace(e));
+            return StepResult.failed("Exception while getting response from IDP"+e.getMessage());
+        }
 
     }
 
