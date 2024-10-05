@@ -7,6 +7,7 @@ import com.springheaven.gom.canary.ida.service.IdaTokenService;
 import com.springheaven.gom.canary.idp.config.IdpApiConfig;
 import com.springheaven.gom.canary.idp.service.IpdTokenService;
 import com.springheaven.gom.canary.testrunner.Result;
+import com.springheaven.gom.canary.testrunner.Step;
 import com.springheaven.gom.canary.testrunner.StepResult;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -94,6 +95,7 @@ public class StepRepository {
         return currentDateTime;
     }
 
+    @Step
     public Result firstStep(){
         try{
             setParameters();
@@ -112,6 +114,7 @@ public class StepRepository {
 
     }
 
+    @Step
     public Result secondStep() {
         try {
             setParameters();
@@ -129,6 +132,7 @@ public class StepRepository {
     }
 
 
+    @Step
         public Result thirdStep(){
             try{
                 setParameters();

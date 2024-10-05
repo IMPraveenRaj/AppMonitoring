@@ -28,6 +28,7 @@ public class CommonConfig {
     @Bean("commonObjectMapper")
     @Primary
     public ObjectMapper createCommonObjectMapper(){
+        System.out.println("i am create common objectMapper");
     ObjectMapper mapper= new ObjectMapper();
     mapper.configure(SerializationFeature.WRAP_ROOT_VALUE,false);
     mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES,false);
