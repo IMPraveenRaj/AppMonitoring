@@ -151,8 +151,10 @@ public class StepRepository {
 
     }
 
-    private  Result getHttpResult(final String messageBody){
+    public  Result getHttpResult(final String messageBody){
 
+
+        restUrl="https://fa-reporting-isdpservice.jpmchase.net:8845/isdp-rest/querysvc/query";
 
         try(CloseableHttpClient httpClient= context.getBean("idpHttpClient",CloseableHttpClient.class)){
             HttpPost request=  new HttpPost(restUrl);
